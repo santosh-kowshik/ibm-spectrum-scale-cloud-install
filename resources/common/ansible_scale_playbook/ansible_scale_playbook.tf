@@ -71,7 +71,7 @@ locals {
   send_message_script_path      = "${path.module}/send_sns_notification.py"
   scale_tuning_param_path       = format("%s/%s", var.scale_infra_repo_clone_path, "scalesncparams.profile")
   scale_infra_path              = format("%s/%s", var.scale_infra_repo_clone_path, "ibm-spectrum-scale-install-infra")
-  cloud_playbook_path           = format("%s/%s", local.scale_infra_path, "cloud_playbook.yml")
+  cloud_playbook_path           = format("%s/%s", local.scale_infra_path, "aws_cloud_playbook.yml")
   infra_complete_message        = "Provisioning infrastructure required for IBM Spectrum Scale deployment completed successfully."
   cluster_complete_message      = "IBM Spectrum Scale cluster creation completed successfully."
 }
@@ -122,7 +122,7 @@ resource "null_resource" "prepare_ibm_spectrum_scale_install_infra" {
   count = (var.create_scale_cluster == true || var.generate_ansible_inv == true) ? 1 : 0
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    command     = "mkdir -p ${local.scale_infra_path}/vars; cp ${local.scale_infra_path}/collections/ansible_collections/ibm/spectrum_scale/samples/aws_cloud_playbook.yml ${local.scale_infra_path}/cloud_playbook.yml; cp ${local.scale_infra_path}/collections/ansible_collections/ibm/spectrum_scale/samples/set_json_variables.yml ${local.scale_infra_path}/set_json_variables.yml;"
+    command     = "mkdir -p ${local.scale_infra_path}/vars; cp ${local.scale_infra_path}/collections/ansible_collections/ibm/spectrum_scale/samples/playbook_aws.yml ${local.scale_infra_path}/aws_cloud_playbook.yml; cp ${local.scale_infra_path}/collections/ansible_collections/ibm/spectrum_scale/samples/set_json_variables.yml ${local.scale_infra_path}/set_json_variables.yml;"
   }
   depends_on = [null_resource.gitclone_ibm_spectrum_scale_install_infra]
 }
