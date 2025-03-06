@@ -17,6 +17,7 @@ limitations under the License.
 
 import argparse
 import json
+import os
 import pathlib
 import re
 
@@ -220,8 +221,7 @@ if __name__ == "__main__":
         print("Merged Storage Nodes(alternating by FG) : {0}".format(storage_instances))
 
     for each_ip in storage_instances:
-        if storage_instances.index(each_ip) <= (start_quorum_assign) and \
-           storage_instances.index(each_ip) <= (manager_count - 1):
+        if storage_instances.index(each_ip) <= (start_quorum_assign) and storage_instances.index(each_ip) <= (manager_count - 1):
             if storage_instances.index(each_ip) == 0:
                 initialize_node_details(each_ip, each_ip,
                                         ansible_ssh_private_key_file=ARGUMENTS.ansible_ssh_private_key_file,
@@ -240,8 +240,7 @@ if __name__ == "__main__":
                                         is_gui_server=False, is_collector_node=False, is_nsd_server=True,
                                         is_quorum_node=True, is_manager_node=True, is_admin_node=True,
                                         node_class="storagenodegrp")
-        elif storage_instances.index(each_ip) <= (start_quorum_assign) and \
-             storage_instances.index(each_ip) > (manager_count - 1):
+        elif storage_instances.index(each_ip) <= (start_quorum_assign) and storage_instances.index(each_ip) > (manager_count - 1):
             initialize_node_details(each_ip, each_ip,
                                     ansible_ssh_private_key_file=ARGUMENTS.ansible_ssh_private_key_file,
                                     is_gui_server=False, is_collector_node=False, is_nsd_server=True,
@@ -258,8 +257,7 @@ if __name__ == "__main__":
         if len(storage_instances) - len(TF_INV['compute_instance_desc_map'].keys()) >= quorum_count:
             quorums_left = 0
         else:
-            quorums_left = quorum_count - len(storage_instances) - \
-                    len(TF_INV['compute_instance_desc_map'].keys())
+            quorums_left = quorum_count - len(storage_instances) - len(TF_INV['compute_instance_desc_map'].keys())
     else:
         if len(TF_INV['storage_instance_disk_map'].keys()) > quorum_count:
             quorums_left = 0
@@ -335,14 +333,21 @@ if __name__ == "__main__":
 
     if ARGUMENTS.verbose:
         print("Content of scale_clusterdefinition.json: ",
-              json.dumps(CLUSTER_DEFINITION_JSON, indent=4))
+            json.dumps(CLUSTER_DEFINITION_JSON, indent=4))
+
+    file_path = os.path.join(ARGUMENTS.ansible_scale_repo_path.rstrip('/'), SCALE_CLUSTER_DEFINITION_PATH.lstrip('/'))
+
+    if ARGUMENTS.verbose:        
+        print("Writing cloud infrastructure details to: ",
+            ARGUMENTS.ansible_scale_repo_path.rstrip('/') + SCALE_CLUSTER_DEFINITION_PATH)
+
+    # Make sure the var directory exists
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
     # Write json content
-    if ARGUMENTS.verbose:
-        print("Writing cloud infrastructure details to: ",
-              ARGUMENTS.ansible_scale_repo_path.rstrip('/') + SCALE_CLUSTER_DEFINITION_PATH)
-    with open(ARGUMENTS.ansible_scale_repo_path.rstrip('/') + SCALE_CLUSTER_DEFINITION_PATH, 'w') as json_fh:
+    with open(file_path, 'w') as json_fh:
         json.dump(CLUSTER_DEFINITION_JSON, json_fh, indent=4)
+
     if ARGUMENTS.verbose:
         print("Completed writing cloud infrastructure details to: ",
-              ARGUMENTS.ansible_scale_repo_path.rstrip('/') + SCALE_CLUSTER_DEFINITION_PATH)
+                ARGUMENTS.ansible_scale_repo_path.rstrip('/') + SCALE_CLUSTER_DEFINITION_PATH)
